@@ -1,6 +1,8 @@
 #!/usr/bin/python3
-"""This is the console for AirBnB"""
+"""Defines the HBNB console."""
 import cmd
+from shlex import split
+from models import storage
 from datetime import datetime
 from models.base_model import BaseModel
 from models.user import User
@@ -9,35 +11,38 @@ from models.city import City
 from models.amenity import Amenity
 from models.place import Place
 from models.review import Review
-from shlex import split
-from models import storage
 
 
 class HBNBCommand(cmd.Cmd):
-    """this class is entry point of the command interpreter
-    """
+    """Defines the HolbertonBnB command interpreter."""
+
     prompt = "(hbnb) "
-    __classes = {"BaseModel", "User", "City", "State", "Amenity", "Place",
-                 "Review"}
+    __classes = {
+        "BaseModel",
+        "User",
+        "State",
+        "City",
+        "Amenity",
+        "Place",
+        "Review"
+    }
 
     def emptyline(self):
-        """Ignores empty spaces"""
+        """Ignore empty spaces."""
         pass
 
     def do_quit(self, line):
-        """Quit command to exit the program"""
+        """Quit command to exit the program."""
         return True
 
     def do_EOF(self, line):
-        """Quit command to exit the program at end of file"""
+        """EOF signal to exit the program."""
         print("")
         return True
 
     def do_create(self, line):
-        """Creates a new instance of BaseModel, saves it
-        Exceptions:
-            SyntaxError: when there is no args given
-            NameError: when there is no object taht has the name
+        """Usage: create <class> <key 1>=<value 2> <key 2>=<value 2> ...
+        Create a new class instance with given keys/values and print its id.
         """
         try:
             if not line:
@@ -46,15 +51,15 @@ class HBNBCommand(cmd.Cmd):
 
             kwargs = {}
             for i in range(1, len(my_list)):
-                key, val = tuple(my_list[i].split("="))
-                if val[0] == '"':
-                    val = val.strip('"').replace("_", " ")
+                key, value = tuple(my_list[i].split("="))
+                if value[0] == '"':
+                    value = value.strip('"').replace("_", " ")
                 else:
                     try:
-                        val = eval(val)
+                        value = eval(value)
                     except (SyntaxError, NameError):
                         continue
-                kwargs[key] = val
+                kwargs[key] = value
 
             if kwargs == {}:
                 obj = eval(my_list[0])()
@@ -133,24 +138,20 @@ class HBNBCommand(cmd.Cmd):
             print("** no instance found **")
 
     def do_all(self, line):
-        """Prints all string representation of all instances
-        Exceptions:
-            NameError: when there is no object taht has the name
-        """
-        """objects = storage.all()
-        my_list = []"""
-
+        """Usage: all or all <class> or <class>.all()
+        Display string representations of all instances of a given class.
+        If no class is specified, displays all instantiated objects."""
         if not line:
-            obj = storage.all()
-            print([obj[key].__str__() for key in obj])
+            o = storage.all()
+            print([o[k].__str__() for k in o])
             return
         try:
             args = line.split(" ")
             if args[0] not in self.__classes:
                 raise NameError()
 
-            obj = storage.all(eval(args[0]))
-            print([obj[key].__str__() for key in obj])
+            o = storage.all(eval(args[0]))
+            print([o[k].__str__() for k in o])
 
         except NameError:
             print("** class doesn't exist **")
